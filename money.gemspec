@@ -1,15 +1,14 @@
 Gem::Specification.new do |s|
-  s.name        = "money"
-  s.version     = "3.5.5"
+  s.name        = "ecr_money"
+  s.version     = "3.6.5"
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Tobias Luetke", "Hongli Lai", "Jeremy McNevin", "Shane Emmons", "Simone Carletti"]
-  s.email       = ["hongli@phusion.nl", "semmons99+RubyMoney@gmail.com"]
+  s.authors     = ["Alberto Peña", "Enrique Comba Riepenhausen"]
+  s.email       = ["ecomba@nexwerk.com", "plagelao@gmail.com"]
   s.homepage    = "http://money.rubyforge.org"
   s.summary     = "Money and currency exchange support library."
-  s.description = "This library aids one in handling money and different currencies."
+  s.description = "This library aids one in handling money and different currencies. Based on the money gem"
 
   s.required_rubygems_version = ">= 1.3.6"
-  s.rubyforge_project         = "money"
 
   s.add_dependency "i18n", "~> 0.4"
 
