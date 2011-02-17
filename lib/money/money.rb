@@ -20,6 +20,8 @@ class Money
   # @return [Money::Bank::*]
   attr_reader :bank
 
+  attr_reader :exact_number
+
   # Class Methods
   class << self
     # Each Money object is associated to a bank object, which is responsible
@@ -385,8 +387,9 @@ class Money
   #
   # @see Money.new_with_dollars
   #
-  def initialize(cents, currency = Money.default_currency, bank = Money.default_bank)
-    @cents = cents.round.to_i
+  def initialize(exact_number, currency = Money.default_currency, bank = Money.default_bank)
+    @exact_number = exact_number
+    @cents = exact_number.round.to_i
     @currency = Currency.wrap(currency)
     @bank = bank
   end

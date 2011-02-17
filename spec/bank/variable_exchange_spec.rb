@@ -38,12 +38,15 @@ describe Money::Bank::VariableExchange do
         lambda{@bank.exchange_with(Money.new(100, 'USD'), 'JPY')}.should raise_exception(Money::Bank::UnknownRate)
       end
 
-      #it 'should round the exchanged result down' do
-      #  @bank.add_rate("USD", "EUR", 0.788332676)
-      #  @bank.add_rate("EUR", "YEN", 122.631477)
-      #  @bank.exchange_with(Money.new(10_00,  "USD"), "EUR").should == Money.new(788, "EUR")
-      #  @bank.exchange_with(Money.new(500_00, "EUR"), "YEN").should == Money.new(6131573, "YEN")
-      #end
+      it 'should round the exchanged result down' do
+        @bank.add_rate("USD", "EUR", 0.788332676)
+        @bank.add_rate("EUR", "YEN", 122.631477)
+        @bank.add_rate("USD", "CLP", 2)
+        @bank.exchange_with(Money.new(10_00,  "USD"), "EUR").should == Money.new(788, "EUR")
+        @bank.exchange_with(Money.new(500_00, "EUR"), "YEN").should == Money.new(6131574, "YEN")
+        @bank.exchange_with(Money.new(500_00, "EUR"), "YEN").exact_number.should == 6131573.85
+        @bank.exchange_with(Money.new(10_00,  "USD"), "CLP").should == Money.new(20, "CLP")
+      end
 
       it 'should accept a custom truncation method' do
         proc = Proc.new { |n| n.ceil }

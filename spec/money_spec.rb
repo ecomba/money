@@ -8,7 +8,9 @@ describe Money do
     it "rounds the given cents to an integer" do
       Money.new(1.00, "USD").cents.should == 1
       Money.new(1.01, "USD").cents.should == 1
+      Money.new(1.01, "USD").exact_number.should == 1.01
       Money.new(1.50, "USD").cents.should == 2
+      Money.new(1.50, "USD").exact_number.should == 1.5
     end
 
     it "is associated to the singleton instance of Bank::VariableExchange by default" do
