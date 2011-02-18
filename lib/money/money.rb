@@ -388,7 +388,7 @@ class Money
   # @see Money.new_with_dollars
   #
   def initialize(exact_number, currency = Money.default_currency, bank = Money.default_bank)
-    @exact_number = exact_number
+    @exact_number = BigDecimal.new(exact_number.to_s)
     @cents = exact_number.round.to_i
     @currency = Currency.wrap(currency)
     @bank = bank
