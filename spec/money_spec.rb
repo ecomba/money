@@ -650,6 +650,22 @@ describe Money do
   end
 
   describe "#format" do
+
+    it 'returns the monetary value with the specified number of decimals' do
+      euro = Money.new(0.34567898765432134567890, "EUR")
+      euro.format(:decimals => 7).should == '0,0034567 €'
+    end
+
+    it 'returns the monetary value with the specified number of decimals for a short number' do
+      euro = Money.new(0.34, "EUR")
+      euro.format(:decimals => 8).should == '0,00340000 €'
+    end
+
+    it 'without a euro symbol' do
+      euro = Money.new(0.34, "EUR")
+      euro.format(:decimals => 8, :symbol => false).should == '0,00340000'
+    end
+
     it "returns the monetary value as a string" do
       Money.ca_dollar(100).format.should == "$1.00"
       Money.new(40008).format.should == "$400.08"

@@ -22,6 +22,10 @@ class Money
 
   attr_reader :exact_number
 
+  attr_reader :unit
+
+  attr_reader :subunit
+
   # Class Methods
   class << self
     # Each Money object is associated to a bank object, which is responsible
@@ -392,6 +396,7 @@ class Money
     @cents = exact_number.round.to_i
     @currency = Currency.wrap(currency)
     @bank = bank
+    @unit, @subunit  = @exact_number.to_f.abs.divmod(@currency.subunit_to_unit).map{|o| o.to_s}
   end
 
   # Returns the value of the money in dollars,
@@ -841,6 +846,12 @@ class Money
   # @example
   #   s = Money.ca_dollar(570).format(:html => true, :with_currency => true)
   #   s #=>  "$5.70 <span class=\"currency\">CAD</span>"
+  def huh
+    rules = normalize_formatting_rules(rules)
+    puts rules.inspect
+    Money::Formatter::CurrencyName.new(:previous => self, :formatted_string => self.cents.to_s, :rules => rules).format
+  end
+
   def format(*rules)
     # support for old format parameters
     rules = normalize_formatting_rules(rules)
@@ -874,6 +885,9 @@ class Money
                 else
                   "#{self.to_s}"
                 end
+    if rules[:decimals] && !rules[:no_cents]
+      formatted = formatted + exact_number.to_f.to_s.split('.')[1]
+    end
 
     symbol_position =
       if rules.has_key?(:symbol_position)
@@ -888,9 +902,12 @@ class Money
       formatted = (symbol_position == :before ? "#{symbol_value}#{formatted}" : "#{formatted} #{symbol_value}")
     end
 
+    d_mark = decimal_mark
+
     if rules.has_key?(:decimal_mark) and rules[:decimal_mark] and
       rules[:decimal_mark] != decimal_mark
       formatted.sub!(decimal_mark, rules[:decimal_mark])
+      d_mark = rules[:decimal_mark]
     end
 
     thousands_separator_value = thousands_separator
@@ -904,7 +921,18 @@ class Money
     end
 
     # Apply thousands_separator
-    formatted.gsub!(/(\d)(?=(?:\d{3})+(?:[^\d]|$))/, "\\1#{thousands_separator_value}")
+    if (rules.has_key?(:decimal_mark) and rules[:decimal_mark]) or rules[:decimals]
+      decimals = rules[:decimals] || 2
+      integer, rational = formatted.split(d_mark)
+      rational, symbol = rational.split
+      integer.gsub!(/(\d)(?=(?:\d{3})+(?:[^\d]|$))/, "\\1#{thousands_separator_value}")
+      rational_slice = rational.slice(0, decimals) 
+      (decimals - rational_slice.length).times { rational_slice << '0' }
+      formatted = (integer + d_mark + rational_slice + " #{symbol}").strip
+    else
+      formatted.gsub!(/(\d)(?=(?:\d{3})+(?:[^\d]|$))/, "\\1#{thousands_separator_value}")
+    end
+
 
     if rules[:with_currency]
       formatted << " "
@@ -922,14 +950,14 @@ class Money
   # @example
   #   Money.ca_dollar(100).to_s #=> "1.00"
   def to_s
-    unit, subunit  = cents.abs.divmod(currency.subunit_to_unit).map{|o| o.to_s}
     if currency.decimal_places == 0
-      return "-#{unit}" if cents < 0
-      return unit
+      return "-#{@unit}" if exact_number.to_f < 0
+      return @unit
     end
-    subunit = (("0" * currency.decimal_places) + subunit)[(-1*currency.decimal_places)..-1]
-    return "-#{unit}#{decimal_mark}#{subunit}" if cents < 0
-    "#{unit}#{decimal_mark}#{subunit}"
+    subunit = (("0" * currency.decimal_places) + @subunit.to_i.to_s)[(-1*currency.decimal_places)..-1]
+
+    return "-#{@unit}#{decimal_mark}#{subunit}" if exact_number.to_f < 0
+    "#{@unit}#{decimal_mark}#{subunit}"
   end
 
   # Return the amount of money as a float. Floating points cannot guarantee
