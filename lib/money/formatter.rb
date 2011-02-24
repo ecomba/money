@@ -23,4 +23,6 @@ module Money::Formatter
   end
 end
 
-Dir.glob(File.dirname(__FILE__) + '/formatter/*', &method(:require))
+Dir.glob(File.dirname(__FILE__) + '/formatter/*').each do |file|
+  require file
+end
